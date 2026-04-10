@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>IBM Cognos Analytics | Enterprise Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* Login Container */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-icon {
+            text-align: center;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .login-sub {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(102,126,234,0.5);
+        }
+
+        .demo-info {
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 1rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-top: 1.5rem;
+        }
+
+        .error-msg {
+            color: #dc2626;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            display: none;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .top-bar {
+            background: white;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand i {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand span {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-badge {
+            background: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .logout-button {
+            background: #ef4444;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-button:hover {
+            background: #dc2626;
+            transform: scale(0.97);
+        }
+
+        .dashboard-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-block {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .stat-block:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-title {
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 0.5rem;
+        }
+
+        .iframe-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .iframe-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .iframe-wrapper {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .cognos-frame {
+            width: 100%;
+            height: 550px;
+            border: none;
+            background: white;
+        }
+
+        .connect-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .connect-header {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f1f5f9;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .green-dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .source-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .source-name {
+            font-weight: 500;
+        }
+
+        .source-status {
+            color: #10b981;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-content {
+                padding: 1rem;
+            }
+            .cognos-frame {
+                height: 400px;
+            }
+            .top-bar {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SECTION -->
+<div id="loginSection" class="login-wrapper">
+    <div class="login-card">
+        <div class="logo-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <h2>Analytics Pro</h2>
+        <div class="login-sub">IBM Cognos Embedded Dashboard</div>
+        <form id="loginForm">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="loginUsername" class="input-field" placeholder="admin@cognos.com" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="loginPassword" class="input-field" placeholder="any password">
+            </div>
+            <button type="submit" id="loginSubmitBtn" class="btn-login">
+                <span id="loginBtnText">Access Dashboard</span>
+            </button>
+            <div class="demo-info">
+                <i class="fas fa-info-circle"></i> Demo: any username & any password (just click login)
+            </div>
+            <div id="loginErrorMessage" class="error-msg"></div>
+        </form>
+    </div>
+</div>
+
+<!-- DASHBOARD SECTION (hidden initially) -->
+<div id="dashboardSection" class="dashboard-container">
+    <div class="top-bar">
+        <div class="brand">
+            <i class="fas fa-chart-pie"></i>
+            <span>IBM Cognos Live</span>
+        </div>
+        <div class="user-area">
+            <div class="user-badge" id="displayUserName">
+                <i class="fas fa-user-circle"></i> Analyst
+            </div>
+            <button id="logoutAction" class="logout-button">
+                <i class="fas fa-sign-out-alt"></i> Exit
+            </button>
+        </div>
+    </div>
+    <div class="dashboard-content">
+        <div class="stats-row">
+            <div class="stat-block">
+                <div class="stat-title">Cognos Connection</div>
+                <div class="stat-number" id="connStatus">Active</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-title">Data Sources</div>
+                <div class="stat-number" id="dataCount">4</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-title">Last Sync</div>
+                <div class="stat-number" id="lastSyncTime">Just now</div>
+            </div>
+            <div class="stat-block">
+                <div class="stat-title">Session</div>
+                <div class="stat-number" id="sessionTimer">0s</div>
+            </div>
+        </div>
+
+        <!-- IBM COGNOS IFRAME - YOUR DASHBOARD -->
+        <div class="iframe-card">
+            <div class="iframe-title">
+                <i class="fas fa-chart-simple" style="color: #667eea;"></i>
+                IBM Cognos Analytics Dashboard
+            </div>
+            <div class="iframe-wrapper">
+                <iframe 
+                    id="cognosEmbedFrame"
+                    class="cognos-frame"
+                    src="https://ap2.ca.analytics.ibm.com/bi/?perspective=dashboard&amp;pathRef=.my_folders%2Fqn5&amp;closeWindowOnLastView=true&amp;ui_appbar=false&amp;ui_navbar=false&amp;shareMode=embedded&amp;action=view&amp;mode=dashboard&amp;subView=model0000019d6cabcd55_00000002&amp;nav_filter=true"
+                    title="IBM Cognos Embedded"
+                    allow="encrypted-media"
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <div style="margin-top: 12px; font-size: 0.7rem; text-align: center; color: #64748b;">
+                <i class="fas fa-shield-alt"></i> Secure TLS 1.3 | IBM Cognos Enterprise
+            </div>
+        </div>
+
+        <!-- Connectivity panel -->
+        <div class="connect-card">
+            <div class="connect-header">
+                <i class="fas fa-plug"></i> Data Connectivity Status
+            </div>
+            <div class="status-line">
+                <div class="green-dot"></div>
+                <strong>IBM Cognos Gateway:</strong> Online & Responsive
+                <i class="fas fa-check-circle" style="color: #10b981; margin-left: auto;"></i>
+            </div>
+            <div class="source-row">
+                <span class="source-name"><i class="fas fa-database"></i> Sales Analytics Dataset</span>
+                <span class="source-status">Connected</span>
+            </div>
+            <div class="source-row">
+                <span class="source-name"><i class="fas fa-chart-line"></i> KPI Dashboard Stream</span>
+                <span class="source-status">Live</span>
+            </div>
+            <div class="source-row">
+                <span class="source-name"><i class="fas fa-users"></i> Customer 360 View</span>
+                <span class="source-status">Synchronized</span>
+            </div>
+            <div class="source-row">
+                <span class="source-name"><i class="fas fa-cloud"></i> Cloud Data Warehouse</span>
+                <span class="source-status">Active</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM elements
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const loginForm = document.getElementById('loginForm');
+        const loginUsername = document.getElementById('loginUsername');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+        const loginBtnText = document.getElementById('loginBtnText');
+        const loginErrorMessage = document.getElementById('loginErrorMessage');
+        const logoutAction = document.getElementById('logoutAction');
+        const displayUserName = document.getElementById('displayUserName');
+        const sessionTimerSpan = document.getElementById('sessionTimer');
+        const lastSyncTimeSpan = document.getElementById('lastSyncTime');
+
+        let sessionStart = null;
+        let timerInterval = null;
+        let updateInterval = null;
+
+        // Helper: update last sync time
+        function updateLastSync() {
+            if (lastSyncTimeSpan) {
+                const now = new Date();
+                lastSyncTimeSpan.innerText = now.toLocaleTimeString();
+            }
+        }
+
+        // Session timer
+        function startSessionTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            sessionStart = Date.now();
+            timerInterval = setInterval(() => {
+                if (sessionTimerSpan) {
+                    const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+                    const mins = Math.floor(elapsed / 60);
+                    const secs = elapsed % 60;
+                    sessionTimerSpan.innerText = `${mins}m ${secs}s`;
+                }
+            }, 1000);
+        }
+
+        function stopSessionTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Auto-refresh stats (demo)
+        function startAutoRefresh() {
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(() => {
+                updateLastSync();
+                const dataCountSpan = document.getElementById('dataCount');
+                if (dataCountSpan) {
+                    // random between 4 and 7 for dynamic feel
+                    const newCount = Math.floor(Math.random() * 4) + 4;
+                    dataCountSpan.innerText = newCount;
+                }
+            }, 15000);
+        }
+
+        function stopAutoRefresh() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+
+        // Show dashboard after login
+        function showDashboard(username) {
+            // Store session in localStorage to survive page refresh (GitHub Pages friendly)
+            const displayName = username.split('@')[0] || username;
+            const formattedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+            localStorage.setItem('cognos_session_active', 'true');
+            localStorage.setItem('cognos_user_name', formattedName);
+            
+            // Update UI
+            displayUserName.innerHTML = `<i class="fas fa-user-check"></i> ${formattedName}`;
+            
+            // Hide login, show dashboard
+            loginSection.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            document.body.style.background = '#f1f5f9';
+            
+            // Start timers
+            startSessionTimer();
+            updateLastSync();
+            startAutoRefresh();
+            
+            // Optional: Reload iframe to ensure fresh connection
+            const iframe = document.getElementById('cognosEmbedFrame');
+            if (iframe && iframe.src) {
+                const originalSrc = iframe.src;
+                iframe.src = originalSrc; // forces reload
+            }
+        }
+
+        // Logout function
+        function logout() {
+            // Clear storage
+            localStorage.removeItem('cognos_session_active');
+            localStorage.removeItem('cognos_user_name');
+            
+            // Stop timers
+            stopSessionTimer();
+            stopAutoRefresh();
+            
+            // Show login, hide dashboard
+            loginSection.style.display = 'flex';
+            dashboardSection.style.display = 'none';
+            document.body.style.background = 'linear-gradient(135deg, #0f2027, #203a43, #2c5364)';
+            
+            // Reset login form
+            loginUsername.value = '';
+            loginPassword.value = '';
+            loginErrorMessage.style.display = 'none';
+            loginBtnText.innerHTML = 'Access Dashboard';
+            loginSubmitBtn.disabled = false;
+        }
+
+        // Authentication logic (demo: any non-empty username/password works)
+        function authenticate(username, password) {
+            if (!username || !password) return false;
+            const trimmedUser = username.trim();
+            const trimmedPass = password.trim();
+            if (trimmedUser.length > 0 && trimmedPass.length > 0) {
+                return true;
+            }
+            return false;
+        }
+
+        // Login form handler
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = loginUsername.value;
+            const password = loginPassword.value;
+            
+            // Disable button and show loading
+            loginBtnText.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Authenticating...';
+            loginSubmitBtn.disabled = true;
+            loginErrorMessage.style.display = 'none';
+            
+            // Simulate network delay (realistic)
+            setTimeout(() => {
+                const isValid = authenticate(username, password);
+                if (isValid) {
+                    showDashboard(username);
+                } else {
+                    loginErrorMessage.innerText = 'Please enter both username and password.';
+                    loginErrorMessage.style.display = 'block';
+                    loginBtnText.innerHTML = 'Access Dashboard';
+                    loginSubmitBtn.disabled = false;
+                }
+            }, 600);
+        });
+
+        // Logout button
+        if (logoutAction) {
+            logoutAction.addEventListener('click', logout);
+        }
+
+        // Check for existing session on page load (so refreshing dashboard stays logged in)
+        function checkExistingSession() {
+            const sessionActive = localStorage.getItem('cognos_session_active');
+            const savedUserName = localStorage.getItem('cognos_user_name');
+            if (sessionActive === 'true' && savedUserName) {
+                // restore dashboard without login
+                displayUserName.innerHTML = `<i class="fas fa-user-check"></i> ${savedUserName}`;
+                loginSection.style.display = 'none';
+                dashboardSection.style.display = 'block';
+                document.body.style.background = '#f1f5f9';
+                startSessionTimer();
+                updateLastSync();
+                startAutoRefresh();
+            }
+        }
+
+        // Iframe error fallback (just console, no 404)
+        const cognosIframe = document.getElementById('cognosEmbedFrame');
+        if (cognosIframe) {
+            cognosIframe.onerror = function() {
+                console.log("Note: IBM Cognos iframe could not load (possible security policy). The link is correct.");
+                const wrapper = document.querySelector('.iframe-wrapper');
+                if (wrapper && !wrapper.querySelector('.iframe-fallback')) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'iframe-fallback';
+                    fallback.style.padding = '2rem';
+                    fallback.style.textAlign = 'center';
+                    fallback.style.background = '#fef9c3';
+                    fallback.style.margin = '1rem';
+                    fallback.style.borderRadius = '0.5rem';
+                    fallback.innerHTML = '<i class="fas fa-exclamation-triangle"></i> IBM Cognos embed may be restricted. Your dashboard link is correct.';
+                    wrapper.appendChild(fallback);
+                }
+            };
+        }
+
+        // Initialize
+        checkExistingSession();
+    })();
+</script>
+</body>
+</html>
